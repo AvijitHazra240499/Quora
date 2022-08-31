@@ -2,13 +2,13 @@ const mongoose=require("mongoose")
 
 const questionSchema=new mongoose.Schema({
 
-        description: {type:string,required:true} ,
+        description: {type:String,required:true} ,
         tag: [String],
-        askedBy:{ type:mongoose.Schema.Types.ObjectId(),
-        trim:true,
+        askedBy:{ type:mongoose.Schema.Types.ObjectId,
+        trim:true,required:true,
         ref:"user"},
         deletedAt: {type:Date}, 
-        isDeleted: {type:boolean, default: false},
+        isDeleted: {type:Boolean, default: false},
        
      
 },{timestamps:true})
