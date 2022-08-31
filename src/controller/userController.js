@@ -13,13 +13,19 @@ const registerUser=async(req,res)=>{
             return res.status(400).send({status:false,message:"please provide the user's details to register"})
         }
         let arr=["fname","lname","email","phone","password"]
-        let regex={"email":/^\w+([\.-]?\w+)@\w+([\. -]?\w+)(\.\w{2,3})+$/}
-        let msg={"email":" email is invali"}
+        let regex={"email":/^\w+([\.-]?\w+)@\w+([\. -]?\w+)(\.\w{2,3})+$/,"phone":/^(\+\d{1,3}[- ]?)?\d{10}$/,"password":/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,15}$/}
+        let msg={"email":" email is invalid","phone":" phone is invalid","password":" is invalid password"}
+        let unique={"email":"userModel","phone":"userModel"}
         for(let i of arr){
             if(!data.hasOwnProperty(i)){return res.status(400).send({status:false,message:"Plz  provied the required field "+i})}
             if(!validator.isValid(data[i])) {return res.status(400).send({status:false,message:"Plz  provied "+i})}
             if(regex.hasOwnProperty(i) && !regex[i].test(data[i])){ return res.status(400).send({status:false,message:data[i]+msg[i]})}
+            if(unique.hasOwnProperty(i)){
+                let varUnique= await userModel['findOne']({[i]:data[i]})
+                if(varUnique)return res.status(400).send({status:false,message:i+" is already resistered"})
+            }
         }
+        
         const newUser=await userModel.create({fname,lname,email,phone,password,creditScore:0})
 
 
@@ -38,7 +44,7 @@ const loginUser=async(req,res)=>{
     }
     let arr=["email","password"]
         let regex={"email":/^\w+([\.-]?\w+)@\w+([\. -]?\w+)(\.\w{2,3})+$/}
-        let msg={"email":" email is invali"}
+        let msg={"email":" email is invalid"}
         for(let i of arr){
             if(!data.hasOwnProperty(i)){return res.status(400).send({status:false,message:"Plz  provied the required field "+i})}
             if(!validator.isValid(data[i])) {return res.status(400).send({status:false,message:"Plz  provied "+i})}
@@ -60,5 +66,7 @@ const getUserDtail=async (req,res)=>{
 
 }
 
-const userUpdate={}
+// const userUpdate=async (req,res)={
+
+// }
 module.exports={registerUser,loginUser,getUserDtail}
