@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const {registerUser,loginUser,getUserDtail,userUpdate}=require('./controller/userController')
-const {questionCreate}=require('./controller/questionController')
-const {createAnswer}=require('./controller/answerControler')
+const {questionCreate,getQuestion,getQuestionById,daleteQuestion}=require('./controller/questionController')
+const {createAnswer,getAnsQuesById,deleteQuestion}=require('./controller/answerControler')
 const router=Router()
 
 router.get("/newworld",(req,res)=>{
@@ -17,17 +17,17 @@ router.put("/user/:userId/profile",userUpdate)
 
 // ---------------------------------------question API-----------------------------------------------
 router.post("/question",questionCreate)
-router.get("/questions",registerUser)
-router.get("/questions/:questionId",registerUser)
+router.get("/questions",getQuestion)
+router.get("/questions/:questionId",getQuestionById)
 router.put("/questions/:questionId",registerUser)
-router.delete("/questions/:questionId",registerUser)
+router.delete("/questions/:questionId",daleteQuestion)
 
 
 //-----------------------------------------answer API------------------------------------------------
 router.post("/answer",createAnswer)
-router.post("/questions/:questionId/answer",questionCreate)
-router.post("/answer/:answerId",questionCreate)
-router.post("/answers/:answerId",questionCreate)
+router.get("/questions/:questionId/answer",getAnsQuesById)
+router.put("/answer/:answerId",questionCreate)
+router.delete("/answers/:answerId",deleteQuestion)
 
 
 
