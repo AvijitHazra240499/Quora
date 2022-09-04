@@ -60,11 +60,14 @@ const getAnsQuesById=async(req,res)=>{
     const questionId=req.params.questionId
     if(!questionId)return res.status(400).send({status:false,message:"Plz provied the questionid"})
     if(!mongoose.isValidObjectId(questionId))return res.status(400).send({status:false,message:"PLz provied the valid question id"})
+
     const questionData=await questionModel.findOne({_id:questionId,isDeleted:false}).select({description:1}).lean()
     if(!questionData)return res.status(404).send({status:false,message:"Question not found!"})
+
     const allAnswer=await answerModel.find({questionId,isDeleted:false}).select({text:1,_id:1,answeredBy:1,questionId:1})
     if(!allAnswer.length)return res.status(404).send({status:false,message:"no answer found the Question Q. "+questionData.description})
     questionData['answer']=allAnswer
+
     res.status(200).send({status:true,data:questionData})
 
     }catch(error){
@@ -73,14 +76,38 @@ const getAnsQuesById=async(req,res)=>{
     }
 }
 
+const answerUpadte=async(req,res)=>{
+    try {
+        const [data,answerId]=[req.body , req.params.answerId]
+        if(!Object.keys(data).length)return res.status(400).send({status:false,message:"plz provide data to update answer"})
+        if(!answerId)return res.status(400).send({status:false,message:"plz provide the answerId"})
+        if(!mongoose.isValidObjectId(answerId))return res.status(400).send({status:false,message:"Plz Provide the valid answerId"})
 
-const deleteQuestion=async(req,res)=>{
+        const answerCheck=await answerModel.findOne({_id:answerId,isDeleted:false})
+        if(!answerCheck)return res.status(404).send({status:false,message:"answer not found!"})
+        let {text}=data
+        if(!data.hasOwnProperty("text"))return res.status(404).send({status:false,message:"You can update answer only by text"})
+        if(!isValid(text))return res.status(404).send({status:false,message:"plz provide text"})
+        answerCheck.text=`${text}`.trim()
+        await answerCheck.save()
+        res.status(200).send({status:true,data:answerCheck})
+
+
+    } catch (error) {
+        res.status(500).send({status:false,message:error.message})
+        
+    }
+}
+
+const deleteAnswer=async(req,res)=>{
     try{
     const answerId=req.params.answerId
     if(!answerId)return  res.status(400).send({status:false,message:"Plz provied the answerid"})
     if(!mongoose.isValidObjectId(answerId))return res.status(400).send({status:false,message:"PLz provied the valid answerId"})
+
     const answerData=await answerModel.findOneAndUpdate({_id:answerId,isDeleted:false},{isDeleted:true,deletedAt:Date()})
     if(!answerData)return res.status(404).send({status:false,message:"answer not found!"})
+    
     res.status(200).send({status:true,message:"answer daleted successful! 😁👍"})
     }catch(error){
         res.status(500).send({status:false,message:error.message})
@@ -88,4 +115,4 @@ const deleteQuestion=async(req,res)=>{
 
 }
 
-module.exports={createAnswer,getAnsQuesById,deleteQuestion}
+module.exports={createAnswer,getAnsQuesById,answerUpadte,deleteAnswer}

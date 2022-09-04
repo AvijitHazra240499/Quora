@@ -130,6 +130,48 @@ const getQuestionById=async(req,res)=>{
     }
 }
 
+const questionUpdate=async(req,res)=>{
+    try {
+        const [data,questionId]=[req.body , req.params.questionId]
+        if(!Object.keys(data).length)return res.status(400).send({status:false,message:"plz provide data to update question"})
+        if(!questionId)return res.status(400).send({status:false,message:"plz provide the questionid"})
+        if(!mongoose.isValidObjectId(questionId))return res.status(400).send({status:false,message:"Plz Provide the valid QuestionId"})
+        
+        const quesCheck=await questionModel.findOne({_id:questionId,isDeleted:false})
+        if(!quesCheck)return res.status(404).send({status:false,message:"Question not found!"})
+        let {tag,description}=data
+        if(!tag && !description)return res.status(400).send({status:false,message:"You can update your question with only tag and text"})
+
+        if(data.hasOwnProperty("tag")){
+            if(!validator.isValid(tag))return res.status(400).send({status:false,message:"Plz provide the tag"})
+            if(Array.isArray(tag)){
+                tag=tag.filter(x=>`${x}`.trim() && !quesCheck.tag.includes(x.trim()))
+            }else{
+                tag=tag.split(",").filter(x=>`${x}`.trim() && !quesCheck.tag.includes(x.trim()))
+            }
+            if(tag.length){
+            tag=tag.map(x=>`${x}`.trim())
+            // console.log(quesCheck.tag)
+            quesCheck.tag.push(...tag)
+            }
+        }
+
+        if(data.hasOwnProperty("description")){
+            if(!validator.isValid(description))return res.status(400).send({status:false,message:"Plz provide the test"})
+            quesCheck.description=description
+        }
+
+        await quesCheck.save()
+
+        res.status(200).send({status:true,data:quesCheck})
+        
+
+    } catch (error) {
+        res.status(500).send({status:false,message:error.message})
+        
+    }
+}
+
 const daleteQuestion=async(req,res)=>{
     try {
         const questionId=req.params.questionId
@@ -145,4 +187,4 @@ const daleteQuestion=async(req,res)=>{
         
     }
 }
-module.exports={questionCreate,getQuestion,getQuestionById,daleteQuestion}
+module.exports={questionCreate,getQuestion,getQuestionById,questionUpdate,daleteQuestion}
